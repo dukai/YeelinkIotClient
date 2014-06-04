@@ -31,11 +31,12 @@ public class MainActivity extends Activity {
 					urlConnection = (HttpURLConnection) url.openConnection();
 					InputStream in = new BufferedInputStream(
 							urlConnection.getInputStream());
-					BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+					BufferedReader reader = new BufferedReader(new InputStreamReader(in, "GBK"));
 					String theString;
 					do{
 						theString = reader.readLine();
-						System.out.println(theString);
+						byte[] bs = theString.getBytes("gb2312");
+						System.out.println(new String(bs, "gb2312"));
 					}while(!theString.equals(""));
 				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block
@@ -47,15 +48,13 @@ public class MainActivity extends Activity {
 					urlConnection.disconnect();
 				}
 			}
-		}.run();
+		}.start();
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
-
-		
 
 		return true;
 	}
