@@ -1,6 +1,6 @@
 package net.yeelink.yeelinkiotclient;
 
-import java.text.MessageFormat;
+import java.util.Date;
 
 import net.yeelink.sdk.HttpClient;
 import android.location.Location;
@@ -9,12 +9,14 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.Menu;
 import android.widget.TextView;
 
 public class IndexActivity extends Activity {
 
 	public TextView tv;
+	public TextView tv_updateTime;
 	private LocationManager locationManager;
 	public String result = "";
 
@@ -29,16 +31,17 @@ public class IndexActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.index, menu);
 		tv = (TextView) findViewById(R.id.fist_text);
+		tv_updateTime = (TextView) findViewById(R.id.update_time);
 		tv.setText("人生苦短");
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// 从GPS获取最近的定位信息
 		Location location = locationManager
-				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+				.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
 		updateView(location);
 
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-				2000, 8, new LocationListener() {
+				0, 0, new LocationListener() {
 
 					@Override
 					public void onLocationChanged(Location location) {
@@ -56,7 +59,6 @@ public class IndexActivity extends Activity {
 						// 当GPS LocationProvider可用时，更新位置
 						updateView(locationManager
 								.getLastKnownLocation(provider));
-
 					}
 
 					@Override
@@ -69,6 +71,8 @@ public class IndexActivity extends Activity {
 	}
 
 	private void updateView(Location location) {
+		tv_updateTime.setText(new Date().toString());
+		Log.i("gps", new Date().toString());
 		if (location != null) {
 			StringBuffer sb = new StringBuffer();
 			sb.append("实时的位置信息：\n经度：");
@@ -102,5 +106,6 @@ public class IndexActivity extends Activity {
 			}
 		}).start();
 	}
-
 }
+
+
