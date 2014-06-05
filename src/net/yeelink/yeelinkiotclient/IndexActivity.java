@@ -7,6 +7,9 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
@@ -17,8 +20,10 @@ public class IndexActivity extends Activity {
 
 	public TextView tv;
 	public TextView tv_updateTime;
+	public TextView tv_httpStatus;
 	private LocationManager locationManager;
 	public String result = "";
+	public Handler mHandler;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +37,7 @@ public class IndexActivity extends Activity {
 		getMenuInflater().inflate(R.menu.index, menu);
 		tv = (TextView) findViewById(R.id.fist_text);
 		tv_updateTime = (TextView) findViewById(R.id.update_time);
+		tv_httpStatus = (TextView) findViewById(R.id.htt_status);
 		tv.setText("人生苦短");
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// 从GPS获取最近的定位信息
@@ -40,8 +46,8 @@ public class IndexActivity extends Activity {
 
 		updateView(location);
 
-		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-				0, 0, new LocationListener() {
+		locationManager.requestLocationUpdates(
+				LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
 
 					@Override
 					public void onLocationChanged(Location location) {
@@ -66,6 +72,18 @@ public class IndexActivity extends Activity {
 							Bundle extras) {
 					}
 				});
+		mHandler = new Handler(Looper.getMainLooper()) {
+			@Override
+			public void handleMessage(Message inputMessage) {
+				switch (inputMessage.what) {
+					case 1:
+						String code = ((Integer) inputMessage.obj).toString();
+						tv_httpStatus.setText(code);
+						break;
+				}
+			}
+
+		};
 
 		return true;
 	}
@@ -88,24 +106,29 @@ public class IndexActivity extends Activity {
 			sb.append("\n精度：");
 			sb.append(location.getAccuracy());
 			tv.setText(sb.toString());
-			
-			uploadData(location.getLongitude(), location.getLatitude(), location.getSpeed());
+
+			uploadData(location.getLongitude(), location.getLatitude(),
+					location.getSpeed());
 		} else {
 			// 如果传入的Location对象为空则清空EditText
 			tv.setText("载入中...");
 		}
 	}
-	
-	private void uploadData(double lng, double lat, float speed){
-		result = "{\"value\":{\"lat\":" + lat + ",\"lng\":" + lng + ",\"speed\":" + speed + "}}";
+
+	private void uploadData(double lng, double lat, float speed) {
+		result = "{\"value\":{\"lat\":" + lat + ",\"lng\":" + lng
+				+ ",\"speed\":" + speed + "}}";
 		new Thread(new Runnable() {
 			public void run() {
 				HttpClient http = new HttpClient();
 				http.addHeader("U-APIKEY", "4d0cd8e2e9cd21714b10696f80645d42");
-				http.post("http://api.yeelink.net/v1.0/device/10879/sensor/18016/datapoints", result);
+				http.post(
+						"http://api.yeelink.net/v1.0/device/10879/sensor/18016/datapoints",
+						result);
+				Message completeMessage = mHandler.obtainMessage(1,
+						http.getStatusCode());
+				completeMessage.sendToTarget();
 			}
 		}).start();
 	}
 }
-
-
