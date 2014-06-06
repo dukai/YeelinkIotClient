@@ -93,18 +93,12 @@ public class IndexActivity extends Activity {
 		Log.i("gps", new Date().toString());
 		if (location != null) {
 			StringBuffer sb = new StringBuffer();
-			sb.append("实时的位置信息：\n经度：");
+			sb.append("经度：");
 			sb.append(location.getLongitude());
 			sb.append("\n纬度：");
 			sb.append(location.getLatitude());
-			sb.append("\n高度：");
-			sb.append(location.getAltitude());
 			sb.append("\n速度：");
 			sb.append(location.getSpeed());
-			sb.append("\n方向：");
-			sb.append(location.getBearing());
-			sb.append("\n精度：");
-			sb.append(location.getAccuracy());
 			tv.setText(sb.toString());
 
 			uploadData(location.getLongitude(), location.getLatitude(),
