@@ -31,6 +31,13 @@
             android:label="@string/title_activity_fullscreen"
             android:theme="@style/FullscreenTheme" >
         </activity>
+        <activity
+            android:name="net.yeelink.yeelinkiotclient.CameraCapture"
+            android:label="@string/title_activity_camera_capture" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="net.yeelink.yeelinkiotclient.IndexActivity" />
+        </activity>
     </application>
 
 </manifest>

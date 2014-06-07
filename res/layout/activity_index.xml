@@ -26,9 +26,9 @@
                 android:id="@+id/textView1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="实时位置信息"
-                android:textColor="@color/white"
-                android:textSize="32px" />
+                android:text="位置信息"
+                android:textColor="@color/white" 
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <TextView
                 android:id="@+id/update_time"
@@ -36,7 +36,8 @@
                 android:layout_height="wrap_content"
                 android:text="最后更新时间"
                 android:textColor="@color/white"
-                android:textSize="18px" />
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -48,22 +49,37 @@
                 android:id="@+id/fist_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView"
+                android:text="GPS Information"
                 android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/htt_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Http Response Status Code"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/white"
                 android:text="TextView" />
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/textView2"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:text="TextView" android:background="@color/white"  />
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/btn_camera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OpenCamera" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

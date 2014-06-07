@@ -12,9 +12,15 @@ import android.os.Looper;
 import android.os.Message;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class IndexActivity extends Activity {
 
@@ -24,6 +30,8 @@ public class IndexActivity extends Activity {
 	private LocationManager locationManager;
 	public String result = "";
 	public Handler mHandler;
+	public Button btnCamera;
+	public boolean isQuit = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,14 +46,26 @@ public class IndexActivity extends Activity {
 		tv = (TextView) findViewById(R.id.fist_text);
 		tv_updateTime = (TextView) findViewById(R.id.update_time);
 		tv_httpStatus = (TextView) findViewById(R.id.htt_status);
-		tv.setText("人生苦短");
+		btnCamera = (Button) findViewById(R.id.btn_camera);
+		btnCamera.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Toast.makeText(getApplicationContext(), "点击了", Toast.LENGTH_LONG).show();
+				Intent intent = new Intent(IndexActivity.this, CameraCapture.class);
+				
+				startActivity(intent);
+			}
+		});
+		
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		// 从GPS获取最近的定位信息
 		Location location = locationManager
 				.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
 		updateView(location);
-
+		//定时更新位置信息
 		locationManager.requestLocationUpdates(
 				LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
 
@@ -72,10 +92,15 @@ public class IndexActivity extends Activity {
 							Bundle extras) {
 					}
 				});
+		
+		//handler处理线程事件
 		mHandler = new Handler(Looper.getMainLooper()) {
 			@Override
 			public void handleMessage(Message inputMessage) {
 				switch (inputMessage.what) {
+					case 0:
+						isQuit = true;
+						break;
 					case 1:
 						String code = ((Integer) inputMessage.obj).toString();
 						tv_httpStatus.setText(code);
@@ -87,7 +112,7 @@ public class IndexActivity extends Activity {
 
 		return true;
 	}
-
+	//更新视图
 	private void updateView(Location location) {
 		tv_updateTime.setText(new Date().toString());
 		Log.i("gps", new Date().toString());
@@ -108,7 +133,7 @@ public class IndexActivity extends Activity {
 			tv.setText("载入中...");
 		}
 	}
-
+	//上传位置信息数据
 	private void uploadData(double lng, double lat, float speed) {
 		result = "{\"value\":{\"lat\":" + lat + ",\"lng\":" + lng
 				+ ",\"speed\":" + speed + "}}";
@@ -125,4 +150,21 @@ public class IndexActivity extends Activity {
 			}
 		}).start();
 	}
+	
+	 @Override  
+    public boolean onKeyDown(int keyCode, KeyEvent event) {  
+        if (keyCode == KeyEvent.KEYCODE_BACK) {  
+            if (!isQuit) {  
+                isQuit = true;  
+                Toast.makeText(getApplicationContext(), "再按一次退出程序",  
+                        Toast.LENGTH_SHORT).show();  
+                // 利用handler延迟发送更改状态信息  
+                mHandler.sendEmptyMessageDelayed(0, 2000);  
+            } else {  
+                finish();  
+                System.exit(0);  
+            }  
+        }  
+        return false;  
+    }  
 }
