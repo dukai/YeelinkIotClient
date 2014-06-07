@@ -214,3 +214,5 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+gen/net/yeelink/yeelinkiotclient/BuildConfig.java
+gen/net/yeelink/yeelinkiotclient/R.java
