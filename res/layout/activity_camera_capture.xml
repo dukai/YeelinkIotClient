@@ -12,8 +12,8 @@
 
     <SurfaceView
         android:id="@+id/sv_camera"
-        android:layout_width="480px"
-        android:layout_height="320px"
+        android:layout_width="800px"
+        android:layout_height="480px"
         android:layout_marginTop="17dp" />
 
     <LinearLayout
@@ -33,5 +33,11 @@
             android:text="拍照" />
 
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_launcher" />
 
 </LinearLayout>
