@@ -95,25 +95,32 @@ public class CameraCapture extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				if (camera != null) {
-					camera.takePicture(new ShutterCallback() {
-						public void onShutter() {
-						}
-					}, null, new PictureCallback() {
+				new Thread(new Runnable(){
 
-						@Override
-						public void onPictureTaken(byte[] data,
-								Camera arg1) {
-							Message completeMessage = handler.obtainMessage(1,
-									data);
-							completeMessage.sendToTarget();
-							HttpClient http = new HttpClient();
-							http.addHeader("U-APIKEY", "4d0cd8e2e9cd21714b10696f80645d42");
-							http.post("http://api.yeelink.net/v1.0/device/10879/sensor/18281/photos", data, null);
-						}
+					@Override
+					public void run() {
+						if (camera != null) {
+							camera.takePicture(new ShutterCallback() {
+								public void onShutter() {
+								}
+							}, null, new PictureCallback() {
 
-					});
-				}
+								@Override
+								public void onPictureTaken(byte[] data,
+										Camera arg1) {
+									Message completeMessage = handler.obtainMessage(1,
+											data);
+									completeMessage.sendToTarget();
+									HttpClient http = new HttpClient();
+									http.addHeader("U-APIKEY", "4d0cd8e2e9cd21714b10696f80645d42");
+									http.post("http://api.yeelink.net/v1.0/device/10879/sensor/18281/photos", data, null);
+								}
+
+							});
+						}
+					}
+					
+				}).start();
 			}
 
 		});

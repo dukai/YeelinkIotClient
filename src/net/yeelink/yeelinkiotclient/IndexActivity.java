@@ -3,6 +3,10 @@ package net.yeelink.yeelinkiotclient;
 import java.util.Date;
 
 import net.yeelink.sdk.HttpClient;
+import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
+import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.ShutterCallback;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -27,36 +31,65 @@ public class IndexActivity extends Activity {
 	public TextView tv;
 	public TextView tv_updateTime;
 	public TextView tv_httpStatus;
+	public TextView tv_photoUpload;
 	private LocationManager locationManager;
 	public String result = "";
-	public Handler mHandler;
 	public Button btnCamera;
+	public Button btnBegin;
 	public boolean isQuit = false;
+	public Camera camera;
+	
+	
+	public Handler mHandler = new Handler(Looper.getMainLooper()) {
+		@Override
+		public void handleMessage(Message inputMessage) {
+			switch (inputMessage.what) {
+				case 0:
+					isQuit = true;
+					break;
+				case 1:
+					String code = ((Integer) inputMessage.obj).toString();
+					tv_httpStatus.setText(code);
+					break;
+				case 2:
+					String photoCode = ((Integer) inputMessage.obj).toString();
+					tv_photoUpload.setText(photoCode);
+					break;
+			}
+		}
+
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_index);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.index, menu);
+		
+		
 		tv = (TextView) findViewById(R.id.fist_text);
 		tv_updateTime = (TextView) findViewById(R.id.update_time);
 		tv_httpStatus = (TextView) findViewById(R.id.htt_status);
+		tv_photoUpload = (TextView) findViewById(R.id.tv_photo_upload);
 		btnCamera = (Button) findViewById(R.id.btn_camera);
+		btnBegin = (Button) findViewById(R.id.btn_begin);
 		btnCamera.setOnClickListener(new OnClickListener(){
 
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				Toast.makeText(getApplicationContext(), "点击了", Toast.LENGTH_LONG).show();
+				//Toast.makeText(getApplicationContext(), "点击了", Toast.LENGTH_LONG).show();
 				Intent intent = new Intent(IndexActivity.this, CameraCapture.class);
 				
 				startActivity(intent);
 			}
+		});
+		
+		btnBegin.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				takePictureInterval();
+			}
+			
 		});
 		
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -93,23 +126,13 @@ public class IndexActivity extends Activity {
 					}
 				});
 		
-		//handler处理线程事件
-		mHandler = new Handler(Looper.getMainLooper()) {
-			@Override
-			public void handleMessage(Message inputMessage) {
-				switch (inputMessage.what) {
-					case 0:
-						isQuit = true;
-						break;
-					case 1:
-						String code = ((Integer) inputMessage.obj).toString();
-						tv_httpStatus.setText(code);
-						break;
-				}
-			}
+	}
 
-		};
-
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.index, menu);
+		
 		return true;
 	}
 	//更新视图
@@ -166,5 +189,53 @@ public class IndexActivity extends Activity {
             }  
         }  
         return false;  
-    }  
+	 }
+	 
+	 public void takePictureInterval(){
+		 new Thread(new Runnable(){
+
+			@Override
+			public void run() {
+				while(true){
+					if(camera == null){
+						camera = Camera.open();
+						Parameters params = camera.getParameters();// 获取照相机的参数
+						params.setPictureSize(800, 480);// 设置照片的大小为800*480
+						//params.setPreviewSize(480, 800);// 设置预览取景的大小为800*480
+						params.setFlashMode(Parameters.FLASH_MODE_OFF);// 开启闪光灯
+						params.setJpegQuality(70);// 设置图片质量为50
+						camera.setParameters(params);// 设置以上参数为照相机的参数
+					}
+					
+					camera.takePicture(new ShutterCallback() {
+						public void onShutter() {
+						}
+					}, null, new PictureCallback() {
+
+						@Override
+						public void onPictureTaken(byte[] data,
+								Camera arg1) {
+							HttpClient http = new HttpClient();
+							http.addHeader("U-APIKEY", "4d0cd8e2e9cd21714b10696f80645d42");
+							http.post("http://api.yeelink.net/v1.0/device/10879/sensor/18281/photos", data, null);
+							Message completeMessage = mHandler.obtainMessage(2,
+									http.getStatusCode());
+							completeMessage.sendToTarget();
+						}
+
+					});
+					try {
+						Thread.sleep(20 * 1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				
+				
+			}
+			 
+		 }).start();
+	 }
 }
