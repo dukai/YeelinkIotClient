@@ -1,9 +1,12 @@
 package net.yeelink.yeelinkiotclient;
 
+import java.io.IOException;
 import java.util.Date;
 
 import net.yeelink.sdk.HttpClient;
 import android.hardware.Camera;
+import android.hardware.Camera.AutoFocusCallback;
+import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
@@ -20,6 +23,9 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -38,7 +44,7 @@ public class IndexActivity extends Activity {
 	public Button btnBegin;
 	public boolean isQuit = false;
 	public Camera camera;
-	
+	public SurfaceView svCamera;
 	
 	public Handler mHandler = new Handler(Looper.getMainLooper()) {
 		@Override
@@ -65,6 +71,9 @@ public class IndexActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_index);
 		
+		svCamera = (SurfaceView) findViewById(R.id.sv_photo_preview);
+		svCamera.getHolder().addCallback(new SurfaceCallback());
+		svCamera.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		
 		tv = (TextView) findViewById(R.id.fist_text);
 		tv_updateTime = (TextView) findViewById(R.id.update_time);
@@ -77,9 +86,21 @@ public class IndexActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				//Toast.makeText(getApplicationContext(), "点击了", Toast.LENGTH_LONG).show();
-				Intent intent = new Intent(IndexActivity.this, CameraCapture.class);
+				//Intent intent = new Intent(IndexActivity.this, CameraCapture.class);
 				
-				startActivity(intent);
+				//startActivity(intent);
+				if (camera != null) {
+					camera.autoFocus(new AutoFocusCallback() {
+
+						@Override
+						public void onAutoFocus(boolean success,
+								Camera camera) {
+							// TODO Auto-generated method stub
+
+						}
+
+					});
+				}
 			}
 		});
 		
@@ -99,6 +120,7 @@ public class IndexActivity extends Activity {
 
 		updateView(location);
 		//定时更新位置信息
+		/*
 		locationManager.requestLocationUpdates(
 				LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
 
@@ -125,7 +147,7 @@ public class IndexActivity extends Activity {
 							Bundle extras) {
 					}
 				});
-		
+		*/
 	}
 
 	@Override
@@ -238,4 +260,43 @@ public class IndexActivity extends Activity {
 			 
 		 }).start();
 	 }
+	 
+	 private class SurfaceCallback implements SurfaceHolder.Callback {
+
+			@Override
+			public void surfaceChanged(SurfaceHolder holder, int format, int width,
+					int height) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void surfaceCreated(SurfaceHolder holder) {
+				// TODO Auto-generated method stub
+				try {
+					camera = Camera.open();// 打开摄像头
+					camera.setDisplayOrientation(90);
+					camera.setPreviewDisplay(svCamera.getHolder());// 设置picSV来进行预览取景
+
+					Parameters params = camera.getParameters();// 获取照相机的参数
+					params.setPictureSize(800, 480);// 设置照片的大小为800*480
+					//params.setPreviewSize(480, 800);// 设置预览取景的大小为800*480
+					params.setFlashMode(Parameters.FLASH_MODE_OFF);// 开启闪光灯
+					params.setJpegQuality(70);// 设置图片质量为50
+
+					camera.setParameters(params);// 设置以上参数为照相机的参数
+					camera.startPreview();
+				} catch (IOException e) {// 开始预览取景，然后我们就可以拍照了
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void surfaceDestroyed(SurfaceHolder holder) {
+				camera.stopPreview();
+				camera.release();
+				camera = null;
+			}
+
+		}
 }

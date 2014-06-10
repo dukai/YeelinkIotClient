@@ -99,6 +99,11 @@
                 android:layout_height="wrap_content"
                 android:text="开始拍照" />
 
+            <SurfaceView
+                android:id="@+id/sv_photo_preview"
+                android:layout_width="50px"
+                android:layout_height="113dp"
+                android:layout_weight="1" />
         </LinearLayout>
 
         <TextView
