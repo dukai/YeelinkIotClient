@@ -15,8 +15,12 @@ import android.widget.TextView;
 
 public class TrackActivity extends Activity {
 
+
 	SpeedView view;
 	TextView tv;
+	TextView tvLogo;
+	TextView tvLat;
+	TextView tvLng;
 	
 	public Handler mHandler = new Handler(Looper.getMainLooper()) {
 		@Override
@@ -36,7 +40,17 @@ public class TrackActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_track);
-
+		Typeface tf = Typeface.createFromAsset(getAssets(), "font/DS_DIGI.TTF");// 读取字体
+		tvLogo = (TextView) findViewById(R.id.tv_logo);
+		tvLat = (TextView) findViewById(R.id.tv_lat);
+		tvLng = (TextView) findViewById(R.id.tv_lng);
+		
+		tvLat.setTypeface(tf);
+		tvLng.setTypeface(tf);
+		
+		
+		
+		tvLogo.setTypeface(tf);
 		RelativeLayout rl = (RelativeLayout) findViewById(R.id.track_layout);
 
 		view = new SpeedView(this);
@@ -48,7 +62,7 @@ public class TrackActivity extends Activity {
 		view.setSpeed(0);
 
 		tv = new TextView(this.getApplicationContext());
-		Typeface tf = Typeface.createFromAsset(getAssets(), "font/DS_DIGI.TTF");// 读取字体
+		
 		tv.setText("SPEED");
 		tv.setTypeface(tf);
 		tv.setTextSize(36);
