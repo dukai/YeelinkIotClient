@@ -6,18 +6,70 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
 
 public class SpeedView extends View {
 
 	private int speed = 0;
+	private int prevSpeed = 0;
+	private float currentSpeed = 0;
+	private float step = 0;
+	
+	public Handler mHandler = new Handler(Looper.getMainLooper()) {
+		@Override
+		public void handleMessage(Message inputMessage) {
+			switch (inputMessage.what) {
+				case 0:
+					SpeedView.this.invalidate();
+					break;
+			}
+		}
+
+	};
 	
 	public SpeedView(Context context) {
 		super(context);
 	}
 	
 	public void setSpeed(int value){
+		prevSpeed = speed;
 		speed = value;
+		this.updateSpeed();
+	}
+	
+	public void updateSpeed(){
+		new Thread(new Runnable(){
+
+			@Override
+			public void run() {
+				step = (float) (speed - prevSpeed) / 50;
+				currentSpeed = (float) prevSpeed;
+				int i = 0;
+				while(i < 50){
+					currentSpeed += step;
+					Log.i("run", ((Float) currentSpeed).toString());
+					Message completeMessage = mHandler.obtainMessage(0,
+							i);
+					completeMessage.sendToTarget();
+					i++;
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				currentSpeed = speed;
+				Message completeMessage = mHandler.obtainMessage(0,	i);
+				completeMessage.sendToTarget();
+			}
+			
+		}).start();
 	}
 	
 	@SuppressLint("DrawAllocation")
@@ -31,7 +83,7 @@ public class SpeedView extends View {
         
         p.setStyle(Paint.Style.STROKE);//设置空心  
         RectF oval1=new RectF(40,40,400,400);  
-        canvas.drawArc(oval1, 155, 220, false, p);//小弧形
+        canvas.drawArc(oval1, 155, 230, false, p);//小弧形
         
         Paint p2 = new Paint();
         p2.setColor(0xff3fa2ff);
@@ -40,8 +92,7 @@ public class SpeedView extends View {
         p2.setStyle(Paint.Style.STROKE);
         
         oval1.set(50,50, 390, 390);
-        canvas.drawArc(oval1, 155, speed, false, p2);
-        
+        canvas.drawArc(oval1, 155, currentSpeed, false, p2);
 	}
 
 }

@@ -7,10 +7,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.app.Activity;
-import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.view.Menu;
 import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 public class TrackActivity extends Activity {
@@ -26,7 +26,6 @@ public class TrackActivity extends Activity {
 					int code = (Integer) inputMessage.obj;
 					tv.setText(((Integer) code).toString());
 					view.setSpeed(code);
-					view.invalidate();
 					break;
 			}
 		}
@@ -44,14 +43,19 @@ public class TrackActivity extends Activity {
 		view.setMinimumHeight(1000);
 		view.setMinimumWidth(600);
 		// 通知view组件重绘
-		view.setSpeed(10);
-		view.invalidate();
 		rl.addView(view);
+		
+		view.setSpeed(0);
 
 		tv = new TextView(this.getApplicationContext());
 		Typeface tf = Typeface.createFromAsset(getAssets(), "font/DS_DIGI.TTF");// 读取字体
 		tv.setText("SPEED");
 		tv.setTypeface(tf);
+		tv.setTextSize(36);
+		android.widget.RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+		params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+		tv.setLayoutParams(params);
+		tv.layout(100, 100, 0, 0);
 		rl.addView(tv);
 		
 		new Thread(new Runnable(){
@@ -66,7 +70,7 @@ public class TrackActivity extends Activity {
 							i);
 					completeMessage.sendToTarget();
 					try {
-						Thread.sleep(10);
+						Thread.sleep(5000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
