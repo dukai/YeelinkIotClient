@@ -3,7 +3,6 @@ package net.yeelink.yeelinkiotclient;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Handler;
@@ -81,8 +80,11 @@ public class SpeedView extends View {
         p.setStrokeWidth(20);
         p.setAntiAlias(true);// 设置画笔的锯齿效果。 true是去除，大家一看效果就明白了  
         
-        p.setStyle(Paint.Style.STROKE);//设置空心  
-        RectF oval1=new RectF(40,40,400,400);  
+        p.setStyle(Paint.Style.STROKE);//设置空心
+        
+        int width = this.getWidth();
+        
+        RectF oval1=new RectF(40,100,width - 80, width);  
         canvas.drawArc(oval1, 155, 230, false, p);//小弧形
         
         Paint p2 = new Paint();
@@ -91,7 +93,7 @@ public class SpeedView extends View {
         p2.setAntiAlias(true);
         p2.setStyle(Paint.Style.STROKE);
         
-        oval1.set(50,50, 390, 390);
+        oval1.set(50,110, width - 90, width - 10);
         canvas.drawArc(oval1, 155, currentSpeed, false, p2);
 	}
 
