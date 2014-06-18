@@ -32,6 +32,8 @@ public class SpeedView extends View {
 	
 	public SpeedView(Context context) {
 		super(context);
+		
+		this.setBackgroundColor(0x11000000);
 	}
 	
 	public void setSpeed(int value){
@@ -50,7 +52,7 @@ public class SpeedView extends View {
 				int i = 0;
 				while(i < 50){
 					currentSpeed += step;
-					Log.i("run", ((Float) currentSpeed).toString());
+					//Log.i("run", ((Float) currentSpeed).toString());
 					Message completeMessage = mHandler.obtainMessage(0,
 							i);
 					completeMessage.sendToTarget();
