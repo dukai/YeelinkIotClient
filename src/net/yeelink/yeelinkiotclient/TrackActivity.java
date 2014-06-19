@@ -2,6 +2,8 @@ package net.yeelink.yeelinkiotclient;
 
 import java.util.Random;
 
+import net.yeelink.sdk.HttpClient;
+
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
@@ -86,9 +88,27 @@ public class TrackActivity extends Activity {
 			}
 
 			logMsg(sb.toString());
-
+			uploadData(location.getLongitude(), location.getLatitude(), location.getSpeed());
 			Message completeMessage = mHandler.obtainMessage(1, location);
 			completeMessage.sendToTarget();
+		}
+		
+		//上传位置信息数据
+		private void uploadData(double lng, double lat, float speed) {
+			final String result = "{\"value\":{\"lat\":" + lat + ",\"lng\":" + lng
+					+ ",\"speed\":" + speed + "}}";
+			new Thread(new Runnable() {
+				public void run() {
+					HttpClient http = new HttpClient();
+					http.addHeader("U-APIKEY", "4d0cd8e2e9cd21714b10696f80645d42");
+					http.post(
+							"http://api.yeelink.net/v1.0/device/10879/sensor/18016/datapoints",
+							result);
+					Message completeMessage = mHandler.obtainMessage(2,
+							http.getStatusCode());
+					completeMessage.sendToTarget();
+				}
+			}).start();
 		}
 
 		public void onReceivePoi(BDLocation poiLocation) {
