@@ -1,5 +1,8 @@
 package net.yeelink.yeelinkiotclient;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 import net.yeelink.sdk.HttpClient;
@@ -14,6 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Typeface;
 import android.util.Log;
@@ -33,6 +37,8 @@ public class TrackActivity extends Activity {
 	private boolean isLocate = false;
 	public LocationClient mLocationClient = null;
 	public BDLocationListener myListener = new MyLocationListener();
+	
+	private BDLocation lastLocation = null;
 
 	public Handler mHandler = new Handler(Looper.getMainLooper()) {
 		@Override
@@ -51,13 +57,44 @@ public class TrackActivity extends Activity {
                     Random rand = new Random();
                     int i = rand.nextInt(); //int范围类的随机数
                     i = rand.nextInt(4); //生成0-100以内的随机数
-                    tvSpeed.setText(String.valueOf(location.getSpeed() + i));
+                    
+                    double speed = 0;
+                    
+                    
+                    if(lastLocation != null){
+                    	long stamp = str2Time(lastLocation.getTime());
+                    	long now = str2Time(location.getTime());
+                    	long diff = now - stamp;
+                    	double distance = MapUtils.GetDistance(lastLocation.getLatitude(), lastLocation.getLongitude(), location.getLatitude(), location.getLongitude());
+                    	speed = (double) (distance / diff * 60 * 60);
+                    	
+                    	Log.i("run", String.valueOf(distance));
+                    }
+                	tvSpeed.setText(String.valueOf(speed));
+                    
 					view.setSpeed((int) location.getSpeed() + i);
+					
+					lastLocation = location;
 					break;
 			}
 		}
 
 	};
+	
+	@SuppressLint("SimpleDateFormat")
+	private long str2Time(String time){
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date d;
+		try {
+			d = sdf.parse(time);
+			long l = d.getTime();
+			return l / 1000;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
+	}
 
 	public class MyLocationListener implements BDLocationListener {
 		@Override
@@ -147,7 +184,7 @@ public class TrackActivity extends Activity {
 		mLocationClient.registerLocationListener(myListener);
 		LocationClientOption option = new LocationClientOption();
 		option.setLocationMode(LocationMode.Hight_Accuracy);// 设置定位模式
-		option.setCoorType("bd09ll");// 返回的定位结果是百度经纬度，默认值gcj02
+		option.setCoorType("gcj02");// 返回的定位结果是百度经纬度，默认值gcj02
 		// option.setScanType(5000);//设置发起定位请求的间隔时间为5000ms
 		option.setScanSpan(5000);
 		option.setIsNeedAddress(true);// 返回的定位结果包含地址信息
